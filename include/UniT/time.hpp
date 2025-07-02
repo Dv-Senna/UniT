@@ -5,7 +5,7 @@
 
 namespace UniT {
 	namespace quantities {
-		struct Time;
+		struct Time {};
 	}
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>

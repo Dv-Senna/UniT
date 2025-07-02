@@ -51,6 +51,12 @@ namespace UniT {
 			[[gnu::always_inline]]
 			constexpr auto operator/(UniT::utils::arithmetic auto factor) const noexcept -> This {auto tmp {*this}; return tmp /= factor;}
 
+			[[gnu::always_inline]]
+			constexpr auto operator-() const noexcept -> This requires (!std::is_unsigned_v<Rep>) {
+				auto tmp {*this};
+				tmp.m_data = -tmp.m_data;
+				return tmp;
+			};
 
 			template <typename Rep2, typename Prefix2>
 			[[gnu::always_inline]]
@@ -139,4 +145,16 @@ namespace UniT {
 
 	template <typename T>
 	using get_single_prefix_t = typename get_single_prefix<T>::type;
+
+
+	template <single T>
+	struct flatten_single;
+
+	template <typename Quantity, typename Rep, typename Prefix>
+	struct flatten_single<Single<Quantity, Rep, Prefix>> {
+		using type = Single<Quantity, Rep, std::ratio<Prefix::num, Prefix::den>>;
+	};
+
+	template <typename T>
+	using flatten_single_t = typename flatten_single<T>::type;
 }
