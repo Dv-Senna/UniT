@@ -24,6 +24,10 @@ namespace UniT {
 	concept composed = is_composed_v<T>;
 
 
+	template <typename T>
+	concept unit = UniT::single<T> || composed<T>;
+
+
 	template <composed Lhs, composed Rhs>
 	struct is_same_composed : std::false_type {};
 
@@ -162,11 +166,18 @@ namespace UniT {
 
 	template <composed T>
 	struct reduce_composed {
-		using type = Composed<
+		template <composed U>
+		struct _to_single {using type = U;};
+
+		template <typename Rep, UniT::single Num>
+		struct _to_single<Composed<Rep, UnitGroup<Num>, UnitGroup<>>> {using type = Num;};
+
+		using type = typename _to_single<Composed<
 			get_composed_rep_t<T>,
 			UniT::substract_groups_t<get_composed_num_t<T>, get_composed_den_t<T>>,
 			UniT::substract_groups_t<get_composed_den_t<T>, get_composed_num_t<T>>
-		>;
+		>>::type;
+
 	};
 
 	template <typename T>
@@ -207,6 +218,72 @@ namespace UniT {
 
 	template <typename T>
 	using single_as_composed_t = typename single_as_composed<T>::type;
+
+
+	template <unit Lhs, unit Rhs>
+	struct is_unit_same_quantity : std::false_type {};
+
+	template <composed _Lhs, composed _Rhs>
+	struct is_unit_same_quantity<_Lhs, _Rhs> {
+		using Lhs = reduce_composed_t<_Lhs>;
+		using Rhs = reduce_composed_t<_Rhs>;
+
+		using _LNum = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_num_t<Lhs>>>;
+		using _LDen = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_den_t<Lhs>>>;
+		using _RNum = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_num_t<Rhs>>>;
+		using _RDen = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_den_t<Rhs>>>;
+
+		using LNum = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_LNum, _LDen>>;
+		using LDen = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_LDen, _LNum>>;
+		using RNum = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_RNum, _RDen>>;
+		using RDen = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_RDen, _RNum>>;
+
+		static constexpr bool value = UniT::is_same_group_v<LNum, RNum>
+			&& UniT::is_same_group_v<LDen, RDen>;
+	};
+
+	template <composed _Lhs, UniT::single Rhs>
+	struct is_unit_same_quantity<_Lhs, Rhs> {
+		using Lhs = reduce_composed_t<_Lhs>;
+
+		using _LNum = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_num_t<Lhs>>>;
+		using _LDen = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_den_t<Lhs>>>;
+
+		using LNum = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_LNum, _LDen>>;
+		using LDen = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_LDen, _LNum>>;
+		using RNum = UniT::QuantityGroup<UniT::get_single_quantity_t<Rhs>>;
+		using RDen = UniT::QuantityGroup<>;
+
+		static constexpr bool value = UniT::is_same_group_v<LNum, RNum>
+			&& UniT::is_same_group_v<LDen, RDen>;
+	};
+
+	template <single Lhs, composed _Rhs>
+	struct is_unit_same_quantity<Lhs, _Rhs> {
+		using Rhs = reduce_composed_t<_Rhs>;
+
+		using _RNum = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_num_t<Rhs>>>;
+		using _RDen = UniT::__internals::group_to_tuple_t<UniT::flatten_unit_group_to_quantity_group_t<get_composed_den_t<Rhs>>>;
+
+		using LNum = UniT::QuantityGroup<UniT::get_single_quantity_t<Lhs>>;
+		using LDen = UniT::QuantityGroup<>;
+		using RNum = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_RNum, _RDen>>;
+		using RDen = UniT::__internals::tuple_to_quantity_group_t<UniT::__internals::substract_tuples_t<_RDen, _RNum>>;
+
+		static constexpr bool value = UniT::is_same_group_v<LNum, RNum>
+			&& UniT::is_same_group_v<LDen, RDen>;
+	};
+
+	template <single Lhs, single Rhs>
+	struct is_unit_same_quantity<Lhs, Rhs> {
+		static constexpr bool value = std::same_as<
+			UniT::get_single_quantity_t<Lhs>,
+			UniT::get_single_quantity_t<Rhs>
+		>;
+	};
+
+	template <typename Lhs, typename Rhs>
+	constexpr auto is_unit_same_quantity_v = is_unit_same_quantity<Lhs, Rhs>::value;
 
 
 	template <composed Lhs, composed Rhs>
@@ -273,6 +350,82 @@ namespace UniT {
 	}
 
 
+
+	namespace __internals {
+		template <typename First, typename ...Ratios>
+		struct multiply_variadic_ratios {
+			using type = std::ratio_multiply<
+				First,
+				typename multiply_variadic_ratios<Ratios...>::type
+			>;
+		};
+
+		template <typename Ratio>
+		struct multiply_variadic_ratios<Ratio> {
+			using type = std::ratio<Ratio::num, Ratio::den>;
+		};
+
+		template <typename ...Ratios>
+		using multiply_variadic_ratios_t = typename multiply_variadic_ratios<Ratios...>::type;
+	}
+
+
+	template <unit T>
+	struct get_unit_ratio;
+
+	template <typename Rep, UniT::single ...Nums, UniT::single ...Dens>
+	struct get_unit_ratio<Composed<Rep, UniT::UnitGroup<Nums...>, UniT::UnitGroup<Dens...>>> {
+		using type = std::ratio_divide<
+			__internals::multiply_variadic_ratios_t<UniT::get_single_prefix_t<Nums>...>,
+			__internals::multiply_variadic_ratios_t<UniT::get_single_prefix_t<Dens>...>
+		>;
+	};
+
+	template <UniT::single T>
+	struct get_unit_ratio<T> : UniT::get_single_prefix<T> {};
+
 	template <typename T>
-	concept unit = UniT::single<T> || composed<T>;
+	using get_unit_ratio_t = typename get_unit_ratio<T>::type;
+
+
+	template <unit T>
+	struct get_unit_rep;
+
+	template <composed T>
+	struct get_unit_rep<T> : get_composed_rep<T> {};
+
+	template <UniT::single T>
+	struct get_unit_rep<T> : get_single_rep<T> {};
+
+	template <typename T>
+	using get_unit_rep_t = typename get_unit_rep<T>::type;
+
+
+	template <unit T>
+	struct reduce_unit;
+
+	template <composed T>
+	struct reduce_unit<T> : reduce_composed<T> {};
+
+	template <single T>
+	struct reduce_unit<T> {using type = T;};
+
+	template <typename T>
+	using reduce_unit_t = typename reduce_unit<T>::type;
+
+
+	template <typename From, typename To>
+	concept unit_convertible_to = unit<From> && unit<To> && is_unit_same_quantity_v<From, To>;
+
+	template <unit Unit>
+	constexpr auto unitCast(unit_convertible_to<Unit> auto value) noexcept {
+		using Result = reduce_unit_t<Unit>;
+		using FromRatio = get_unit_ratio_t<decltype(value)>;
+		using ToRatio = get_unit_ratio_t<Result>;
+		using ToRep = get_unit_rep_t<Result>;
+
+		using ConversionRatio = std::ratio_divide<ToRatio, FromRatio>;
+
+		return Result{static_cast<ToRep> ((value.get() * ConversionRatio::num) / ConversionRatio::den)};
+	}
 }

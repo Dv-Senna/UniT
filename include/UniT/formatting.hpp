@@ -1,7 +1,7 @@
 #pragma once
 
+#include <algorithm>
 #include <format>
-#include <ranges>
 #include <string>
 #include <string_view>
 
@@ -170,8 +170,11 @@ namespace UniT {
 
 		public:
 			static constexpr auto value() noexcept -> std::string {
-				const auto numInfos {_unitGroupToInfos<UniT::get_composed_num_t<T>> ()};
-				const auto denInfos {_unitGroupToInfos<UniT::get_composed_den_t<T>> ()};
+				auto numInfos {_unitGroupToInfos<UniT::get_composed_num_t<T>> ()};
+				auto denInfos {_unitGroupToInfos<UniT::get_composed_den_t<T>> ()};
+
+				std::ranges::sort(numInfos, {}, &Info::symbol);
+				std::ranges::sort(denInfos, {}, &Info::symbol);
 
 				std::string result {};
 				for (std::string_view prefix {""}; const auto &info : numInfos) {

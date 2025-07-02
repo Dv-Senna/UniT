@@ -58,11 +58,16 @@ namespace UniT {
 				return tmp;
 			};
 
-			template <typename Rep2, typename Prefix2>
+			/*template <typename Rep2, typename Prefix2>
 			[[gnu::always_inline]]
 			explicit constexpr operator Rebind<Rep2, Prefix2> () const noexcept {
 				using ConvPrefix = std::ratio_divide<Prefix, Prefix>;
 				return Rebind<Rep2, Prefix2> {static_cast<Rep2> ((m_data * ConvPrefix::num) / ConvPrefix::den)};
+			};*/
+			template <typename Rep2>
+			[[gnu::always_inline]]
+			explicit constexpr operator Rebind<Rep2, Prefix> () const noexcept {
+				return Rebind<Rep2, Prefix> {static_cast<Rep2> (m_data)};
 			};
 
 			[[gnu::always_inline]]

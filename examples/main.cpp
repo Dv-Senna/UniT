@@ -24,6 +24,12 @@ int main(int, char**) {
 		UniT::UnitGroup<UniT::Second<float>>
 	>;
 
+	using KgPerS = UniT::Composed<
+		float,
+		UniT::UnitGroup<UniT::Kilogram<float>>,
+		UniT::UnitGroup<UniT::Second<float>>
+	>;
+
 	static_assert(UniT::same_composed<Momentum1, Momentum2>);
 
 
@@ -34,6 +40,8 @@ int main(int, char**) {
 
 	auto p1 {mass * distance / duration};
 	auto p2 {distance * mass / duration / distance2};
+	auto p3 {UniT::unitCast<KgPerS> (p2)};
+	auto m2 {UniT::unitCast<UniT::Kilogram<float>> (p3 * duration)};
 
 	//static_assert(std::same_as<Momentum1, decltype(p1)>);
 	//static_assert(std::same_as<Momentum2, decltype(p2)>);
@@ -44,6 +52,8 @@ int main(int, char**) {
 	std::println("mass : {}", mass);
 	std::println("p1 : {}", p1);
 	std::println("p2 : {}", p2);
+	std::println("p3 : {}", p3);
+	std::println("m2 : {}", m2);
 
 	return 0;
 }
