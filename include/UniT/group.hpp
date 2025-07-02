@@ -252,6 +252,23 @@ namespace UniT {
 
 
 
+	template <typename Lhs, typename Rhs>
+	struct merge_group;
+
+	template <UniT::single ...Lhs, UniT::single ...Rhs>
+	struct merge_group<UnitGroup<Lhs...>, UnitGroup<Rhs...>> {
+		using type = UnitGroup<Lhs..., Rhs...>;
+	};
+
+	template <UniT::utils::quantity ...Lhs, UniT::utils::quantity ...Rhs>
+	struct merge_group<QuantityGroup<Lhs...>, QuantityGroup<Rhs...>> {
+		using type = QuantityGroup<Lhs..., Rhs...>;
+	};
+
+	template <typename Lhs, typename Rhs>
+	using merge_group_t = typename merge_group<Lhs, Rhs>::type;
+
+
 	/**
 	 * @brief Compute `L\R := L\(L∩R)`
 	 * */
@@ -285,4 +302,16 @@ namespace UniT {
 
 	template <typename Lhs, typename Rhs>
 	constexpr auto is_same_group_v = is_same_group<Lhs, Rhs>::value;
+
+
+	template <UniT::utils::rep Rep, unit_group Group>
+	struct is_unit_group_of_rep : std::bool_constant<
+		std::same_as<Rep, get_unit_group_rep_t<Group>>
+	> {};
+
+	template <UniT::utils::rep Rep>
+	struct is_unit_group_of_rep<Rep, UnitGroup<>> : std::true_type {};
+
+	template <typename Rep, typename Group>
+	constexpr auto is_unit_group_of_rep_v = is_unit_group_of_rep<Rep, Group>::value;
 }

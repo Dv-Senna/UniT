@@ -6,16 +6,16 @@
 
 
 namespace UniT {
-	template <UniT::unit_group Num, UniT::unit_group Den>
-	requires std::same_as<UniT::get_unit_group_rep_t<Num>, UniT::get_unit_group_rep_t<Den>>
+	template <UniT::utils::rep Rep, UniT::unit_group Num, UniT::unit_group Den>
+	requires UniT::is_unit_group_of_rep_v<Rep, Num> && UniT::is_unit_group_of_rep_v<Rep, Den>
 	class Composed;
 
 
 	template <typename T>
 	struct is_composed : std::false_type {};
 
-	template <typename Num, typename Den>
-	struct is_composed<Composed<Num, Den>> : std::true_type {};
+	template <typename Rep, typename Num, typename Den>
+	struct is_composed<Composed<Rep, Num, Den>> : std::true_type {};
 
 	template <typename T>
 	constexpr auto is_composed_v = is_composed<T>::value;
@@ -27,8 +27,8 @@ namespace UniT {
 	template <composed Lhs, composed Rhs>
 	struct is_same_composed : std::false_type {};
 
-	template <UniT::unit_group LNum, UniT::unit_group LDen, UniT::unit_group RNum, UniT::unit_group RDen>
-	struct is_same_composed<Composed<LNum, LDen>, Composed<RNum, RDen>> {
+	template <typename Rep, UniT::unit_group LNum, UniT::unit_group LDen, UniT::unit_group RNum, UniT::unit_group RDen>
+	struct is_same_composed<Composed<Rep, LNum, LDen>, Composed<Rep, RNum, RDen>> {
 		static constexpr bool value = UniT::is_same_group_v<
 			UniT::substract_groups_t<LNum, LDen>,
 			UniT::substract_groups_t<RNum, RDen>
@@ -43,15 +43,14 @@ namespace UniT {
 	constexpr auto is_same_composed_v = is_same_composed<Lhs, Rhs>::value;
 
 	template <typename Lhs, typename Rhs>
-	concept same_composed = is_same_composed_v<Lhs, Rhs>;
+	concept same_composed = is_same_composed<Lhs, Rhs>::value;
 
 
 
-	template <UniT::unit_group Num, UniT::unit_group Den>
-	requires std::same_as<UniT::get_unit_group_rep_t<Num>, UniT::get_unit_group_rep_t<Den>>
+	template <UniT::utils::rep Rep, UniT::unit_group Num, UniT::unit_group Den>
+	requires UniT::is_unit_group_of_rep_v<Rep, Num> && UniT::is_unit_group_of_rep_v<Rep, Den>
 	class Composed final {
-		using Rep = UniT::get_unit_group_rep_t<Num>;
-		using This = Composed<Num, Den>;
+		using This = Composed<Rep, Num, Den>;
 
 		static_assert(std::same_as<Rep, float>);
 
@@ -118,4 +117,155 @@ namespace UniT {
 	requires same_composed<Lhs, Rhs>
 	[[gnu::always_inline]]
 	constexpr auto operator<=>(const Lhs &lhs, const Rhs &rhs) noexcept -> bool {return lhs.get() <=> rhs.get();}
+
+
+
+	template <composed T>
+	struct get_composed_num;
+
+	template <typename Rep, UniT::unit_group Num, UniT::unit_group Den>
+	struct get_composed_num<Composed<Rep, Num, Den>> {
+		using type = Num;
+	};
+
+	template <typename T>
+	using get_composed_num_t = typename get_composed_num<T>::type;
+
+
+	template <composed T>
+	struct get_composed_den;
+
+	template <typename Rep, UniT::unit_group Num, UniT::unit_group Den>
+	struct get_composed_den<Composed<Rep, Num, Den>> {
+		using type = Den;
+	};
+
+	template <typename T>
+	using get_composed_den_t = typename get_composed_den<T>::type;
+
+
+	template <composed T>
+	struct get_composed_rep;
+
+	template <typename Rep, UniT::unit_group Num, UniT::unit_group Den>
+	struct get_composed_rep<Composed<Rep, Num, Den>> {
+		using type = Rep;
+	};
+
+	template <typename T>
+	using get_composed_rep_t = typename get_composed_rep<T>::type;
+
+
+
+	template <composed T>
+	struct reduce_composed {
+		using type = Composed<
+			get_composed_rep_t<T>,
+			UniT::substract_groups_t<get_composed_num_t<T>, get_composed_den_t<T>>,
+			UniT::substract_groups_t<get_composed_den_t<T>, get_composed_num_t<T>>
+		>;
+	};
+
+	template <typename T>
+	using reduce_composed_t = typename reduce_composed<T>::type;
+
+
+	template <composed Lhs, composed Rhs>
+	requires std::same_as<get_composed_rep_t<Lhs>, get_composed_rep_t<Rhs>>
+	struct merge_composed {
+		using type = reduce_composed_t<Composed<
+			get_composed_rep_t<Lhs>,
+			UniT::merge_group_t<get_composed_num_t<Lhs>, get_composed_num_t<Rhs>>,
+			UniT::merge_group_t<get_composed_den_t<Lhs>, get_composed_den_t<Rhs>>
+		>>;
+	};
+
+	template <typename Lhs, typename Rhs>
+	using merge_composed_t = typename merge_composed<Lhs, Rhs>::type;
+
+
+	template <composed T>
+	struct inverse_composed {
+		using type = reduce_composed_t<Composed<
+			get_composed_rep_t<T>,
+			get_composed_den_t<T>,
+			get_composed_num_t<T>
+		>>;
+	};
+
+	template <typename T>
+	using inverse_composed_t = typename inverse_composed<T>::type;
+
+
+	template <UniT::single T>
+	struct single_as_composed {
+		using type = Composed<UniT::get_single_rep_t<T>, UniT::UnitGroup<T>, UniT::UnitGroup<>>;
+	};
+
+	template <typename T>
+	using single_as_composed_t = typename single_as_composed<T>::type;
+
+
+	template <composed Lhs, composed Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<Lhs, Rhs> {lhs.get() * rhs.get()};
+	}
+
+	template<composed Lhs, composed Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<Lhs, inverse_composed_t<Rhs>> {lhs.get() / rhs.get()};
+	};
+
+	template <composed T>
+	[[gnu::always_inline]]
+	constexpr auto operator/(get_composed_rep_t<T> factor, T quantity) noexcept {
+		return inverse_composed_t<T> {factor / quantity.get()};
+	};
+
+
+	template <UniT::single Lhs, UniT::single Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<single_as_composed_t<Lhs>, single_as_composed_t<Rhs>> {lhs.get() * rhs.get()};
+	}
+
+	template <UniT::single Lhs, UniT::single Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<single_as_composed_t<Lhs>, inverse_composed_t<single_as_composed_t<Rhs>>> {lhs.get() / rhs.get()};
+	}
+
+	template <UniT::single T>
+	[[gnu::always_inline]]
+	constexpr auto operator/(get_single_rep_t<T> factor, T quantity) noexcept {
+		return inverse_composed_t<single_as_composed_t<T>> {factor / quantity.get()};
+	};
+
+
+	template <UniT::composed Lhs, UniT::single Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<Lhs, single_as_composed_t<Rhs>> {lhs.get() * rhs.get()};
+	}
+
+	template <UniT::single Lhs, composed Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<single_as_composed_t<Lhs>, Rhs> {lhs.get() * rhs.get()};
+	}
+
+
+	template <UniT::composed Lhs, UniT::single Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<Lhs, inverse_composed_t<single_as_composed_t<Rhs>>> {lhs.get() / rhs.get()};
+	}
+
+	template <UniT::single Lhs, UniT::composed Rhs>
+	[[gnu::always_inline]]
+	constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+		return merge_composed_t<single_as_composed_t<Lhs>, inverse_composed_t<Rhs>> {lhs.get() / rhs.get()};
+	}
 }
