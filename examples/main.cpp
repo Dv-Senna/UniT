@@ -41,7 +41,7 @@ int main(int, char**) {
 	auto p1 {mass * distance / duration};
 	auto p2 {distance * mass / duration / distance2};
 	auto p3 {UniT::unitCast<KgPerS> (p2)};
-	auto m2 {UniT::unitCast<UniT::Kilogram<float>> (p3 * duration)};
+	auto m2 {p3 * duration};
 
 	//static_assert(std::same_as<Momentum1, decltype(p1)>);
 	//static_assert(std::same_as<Momentum2, decltype(p2)>);
