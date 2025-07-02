@@ -82,6 +82,18 @@ namespace UniT {
 	constexpr auto get_group_size_v = get_group_size<Group>::value;
 
 
+	template <unit_group Group>
+	struct get_unit_group_rep;
+
+	template <UniT::single ...Ts>
+	struct get_unit_group_rep<UnitGroup<Ts...>> {
+		using type = UniT::get_single_rep_t<std::tuple_element_t<0, std::tuple<Ts...>>>;
+	};
+
+	template <typename Group>
+	using get_unit_group_rep_t = typename get_unit_group_rep<Group>::type;
+
+
 	namespace __internals {
 		template <typename Group>
 		struct group_to_tuple;
