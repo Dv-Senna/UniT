@@ -52,8 +52,6 @@ namespace UniT {
 	class Composed final {
 		using This = Composed<Rep, Num, Den>;
 
-		static_assert(std::same_as<Rep, float>);
-
 		public:
 			[[gnu::always_inline]]
 			constexpr Composed() noexcept = default;
@@ -103,6 +101,11 @@ namespace UniT {
 
 			[[gnu::always_inline]]
 			constexpr auto get() const noexcept -> Rep {return m_data;}
+
+
+			template <same_composed<This> Other>
+			[[gnu::always_inline]]
+			constexpr operator Other() const noexcept {return Other{m_data};}
 
 		private:
 			Rep m_data;
@@ -268,4 +271,8 @@ namespace UniT {
 	constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
 		return merge_composed_t<single_as_composed_t<Lhs>, inverse_composed_t<Rhs>> {lhs.get() / rhs.get()};
 	}
+
+
+	template <typename T>
+	concept unit = UniT::single<T> || composed<T>;
 }

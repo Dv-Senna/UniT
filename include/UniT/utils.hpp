@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <concepts>
 #include <ratio>
+#include <tuple>
 #include <type_traits>
 
 
@@ -31,4 +33,11 @@ namespace UniT::utils {
 
 	template <typename T>
 	concept rep = arithmetic<T>;
+
+
+	template <auto VALUE>
+	struct value_constant {
+		static constexpr auto value = VALUE;
+		using value_type = decltype(VALUE);
+	};
 }

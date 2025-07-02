@@ -4,6 +4,7 @@
 #include <UniT/mass.hpp>
 #include <UniT/time.hpp>
 #include <UniT/composed.hpp>
+#include <UniT/formatting.hpp>
 
 static_assert(UniT::is_same_group_v<
 	UniT::UnitGroup<UniT::Second<float>, UniT::Meter<float>, UniT::Kilometer<float>>,
@@ -28,16 +29,21 @@ int main(int, char**) {
 
 	UniT::Second duration {10.f};
 	UniT::Meter distance {120.f};
+	UniT::freedom::BigMacWidth<float> distance2 {1.f};
 	UniT::Kilogram mass {1.f};
 
 	auto p1 {mass * distance / duration};
-	auto p2 {distance * mass / duration};
+	auto p2 {distance * mass / duration / distance2};
 
-	static_assert(std::same_as<Momentum1, decltype(p1)>);
-	static_assert(std::same_as<Momentum2, decltype(p2)>);
-	static_assert(UniT::same_composed<decltype(p1), decltype(p2)>);
+	//static_assert(std::same_as<Momentum1, decltype(p1)>);
+	//static_assert(std::same_as<Momentum2, decltype(p2)>);
+	//static_assert(UniT::same_composed<decltype(p1), decltype(p2)>);
 
-	std::println("p1==p2 : {}", p1 == p2);
+	std::println("duration : {}", duration);
+	std::println("distance : {}", distance);
+	std::println("mass : {}", mass);
+	std::println("p1 : {}", p1);
+	std::println("p2 : {}", p2);
 
 	return 0;
 }

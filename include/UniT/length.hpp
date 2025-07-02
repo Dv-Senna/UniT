@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UniT/formatting.hpp"
 #include "UniT/single.hpp"
 
 
@@ -7,6 +8,12 @@ namespace UniT {
 	namespace quantities {
 		struct Length {};
 	}
+
+	template <>
+	struct quantity_symbol<quantities::Length> {
+		static constexpr std::string_view value {"m"};
+	};
+
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>
 	using Distance = UniT::Single<quantities::Length, Rep, Prefix>;
@@ -29,6 +36,16 @@ namespace UniT {
 	template <typename Rep> using Femtometer       = Distance<Rep, std::femto>;
 
 
+	template <typename Rep>
+	struct unit_symbol<Parsec<Rep>> {static constexpr auto value() noexcept -> std::string {return "pc";}};
+	template <typename Rep>
+	struct unit_symbol<LightYear<Rep>> {static constexpr auto value() noexcept -> std::string {return "ly";}};
+	template <typename Rep>
+	struct unit_symbol<AstronomicalUnit<Rep>> {static constexpr auto value() noexcept -> std::string {return "au";}};
+	template <typename Rep>
+	struct unit_symbol<Angström<Rep>> {static constexpr auto value() noexcept -> std::string {return "Å";}};
+
+
 	namespace freedom {
 		template <typename Rep> using AverageMcdonaldDistance = Distance<Rep, std::ratio<51'499, 10>>;
 		template <typename Rep> using BigMacWidth = Distance<Rep, std::ratio<2, 23>>;
@@ -44,4 +61,26 @@ namespace UniT {
 		template <typename Rep> using Yard = Distance<Rep, std::ratio<9144, 10>>;
 		template <typename Rep> using Mile = Distance<Rep, std::ratio<1'609'344, 1000>>;
 	}
+
+	template <typename Rep>
+	struct unit_symbol<freedom::AverageMcdonaldDistance<Rep>> {static constexpr auto value() noexcept -> std::string {return "mcdonald-trip";}};
+	template <typename Rep>
+	struct unit_symbol<freedom::BigMacWidth<Rep>> {static constexpr auto value() noexcept -> std::string {return "BigMac™";}};
+	template <typename Rep>
+	struct unit_symbol<freedom::FootballField<Rep>> {static constexpr auto value() noexcept -> std::string {return "football-field";}};
+	template <typename Rep>
+	struct unit_symbol<freedom::TankOfGas<Rep>> {static constexpr auto value() noexcept -> std::string {return "pickup-trip";}};
+
+	template <typename Rep>
+	struct unit_symbol<forbidden::Twip<Rep>> {static constexpr auto value() noexcept -> std::string {return "twip";}};
+	template <typename Rep>
+	struct unit_symbol<forbidden::Point<Rep>> {static constexpr auto value() noexcept -> std::string {return "p";}};
+	template <typename Rep>
+	struct unit_symbol<forbidden::Inch<Rep>> {static constexpr auto value() noexcept -> std::string {return "in";}};
+	template <typename Rep>
+	struct unit_symbol<forbidden::Foot<Rep>> {static constexpr auto value() noexcept -> std::string {return "ft";}};
+	template <typename Rep>
+	struct unit_symbol<forbidden::Yard<Rep>> {static constexpr auto value() noexcept -> std::string {return "yd";}};
+	template <typename Rep>
+	struct unit_symbol<forbidden::Mile<Rep>> {static constexpr auto value() noexcept -> std::string {return "mi";}};
 }

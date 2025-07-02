@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UniT/formatting.hpp"
 #include "UniT/single.hpp"
 
 
@@ -7,6 +8,12 @@ namespace UniT {
 	namespace quantities {
 		struct Time {};
 	}
+
+	template <>
+	struct quantity_symbol<quantities::Time> {
+		static constexpr std::string_view value {"s"};
+	};
+
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>
 	using Duration = UniT::Single<quantities::Time, Rep, Prefix>;
@@ -25,4 +32,20 @@ namespace UniT {
 	template <typename Rep> using Nanosecond      = Duration<Rep, std::nano>;
 	template <typename Rep> using Picosecond      = Duration<Rep, std::pico>;
 	template <typename Rep> using Femtosecond     = Duration<Rep, std::femto>;
+
+
+	template <typename Rep>
+	struct unit_symbol<UniverseAge<Rep>> {static constexpr auto value() noexcept -> std::string {return "ua";}};
+	template <typename Rep>
+	struct unit_symbol<JulianYear<Rep>> {static constexpr auto value() noexcept -> std::string {return "year";}};
+	template <typename Rep>
+	struct unit_symbol<Day<Rep>> {static constexpr auto value() noexcept -> std::string {return "day";}};
+	template <typename Rep>
+	struct unit_symbol<Hour<Rep>> {static constexpr auto value() noexcept -> std::string {return "h";}};
+	template <typename Rep>
+	struct unit_symbol<Minute<Rep>> {static constexpr auto value() noexcept -> std::string {return "min";}};
+	template <typename Rep>
+	struct unit_symbol<SecondTenth<Rep>> {static constexpr auto value() noexcept -> std::string {return "s10th";}};
+	template <typename Rep>
+	struct unit_symbol<SecondHundredth<Rep>> {static constexpr auto value() noexcept -> std::string {return "s100th";}};
 }
