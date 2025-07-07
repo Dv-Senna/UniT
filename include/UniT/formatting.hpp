@@ -132,7 +132,7 @@ namespace UniT {
 	struct unit_symbol<T> {
 		static constexpr auto value() noexcept -> std::string {
 			return std::string{prefix_symbol_v<UniT::get_single_prefix_t<T>>}
-			+ quantity_symbol_v<UniT::get_single_quantity_t<T>>;
+			+ std::string{quantity_symbol_v<UniT::get_single_quantity_t<T>>};
 		}
 	};
 

@@ -424,7 +424,7 @@ namespace UniT {
 		using ToRatio = get_unit_ratio_t<Result>;
 		using ToRep = get_unit_rep_t<Result>;
 
-		using ConversionRatio = std::ratio_divide<ToRatio, FromRatio>;
+		using ConversionRatio = std::ratio_divide<FromRatio, ToRatio>;
 
 		return Result{static_cast<ToRep> ((value.get() * ConversionRatio::num) / ConversionRatio::den)};
 	}
