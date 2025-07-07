@@ -422,10 +422,14 @@ namespace UniT {
 		using Result = reduce_unit_t<Unit>;
 		using FromRatio = get_unit_ratio_t<decltype(value)>;
 		using ToRatio = get_unit_ratio_t<Result>;
+		using FromRep = get_unit_rep_t<decltype(value)>;
 		using ToRep = get_unit_rep_t<Result>;
 
 		using ConversionRatio = std::ratio_divide<FromRatio, ToRatio>;
 
-		return Result{static_cast<ToRep> ((value.get() * ConversionRatio::num) / ConversionRatio::den)};
+		return Result{static_cast<ToRep> (
+			(value.get() * static_cast<FromRep> (ConversionRatio::num))
+			/ static_cast<FromRep> (ConversionRatio::den)
+		)};
 	}
 }
