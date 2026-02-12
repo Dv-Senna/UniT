@@ -1,6 +1,8 @@
 #pragma once
 
-#include "UniT/formatting.hpp"
+#ifndef UNIT_TYPE_ONLY
+	#include "UniT/formatting.hpp"
+#endif
 #include "UniT/single.hpp"
 
 
@@ -9,10 +11,12 @@ namespace UniT {
 		struct Time {};
 	}
 
+#ifndef UNIT_TYPE_ONLY
 	template <>
 	struct quantity_symbol<quantities::Time> {
 		static constexpr std::string_view value {"s"};
 	};
+#endif
 
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>
@@ -34,6 +38,7 @@ namespace UniT {
 	template <typename Rep> using Femtosecond     = Duration<Rep, std::femto>;
 
 
+#ifndef UNIT_TYPE_ONLY
 	template <typename Rep>
 	struct unit_symbol<UniverseAge<Rep>> {static constexpr auto value() noexcept -> std::string {return "ua";}};
 	template <typename Rep>
@@ -48,4 +53,5 @@ namespace UniT {
 	struct unit_symbol<SecondTenth<Rep>> {static constexpr auto value() noexcept -> std::string {return "s10th";}};
 	template <typename Rep>
 	struct unit_symbol<SecondHundredth<Rep>> {static constexpr auto value() noexcept -> std::string {return "s100th";}};
+#endif
 }

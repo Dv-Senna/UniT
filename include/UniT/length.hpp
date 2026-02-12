@@ -1,6 +1,8 @@
 #pragma once
 
-#include "UniT/formatting.hpp"
+#ifndef UNIT_TYPE_ONLY
+	#include "UniT/formatting.hpp"
+#endif
 #include "UniT/single.hpp"
 
 
@@ -9,10 +11,12 @@ namespace UniT {
 		struct Length {};
 	}
 
+#ifndef UNIT_TYPE_ONLY
 	template <>
 	struct quantity_symbol<quantities::Length> {
 		static constexpr std::string_view value {"m"};
 	};
+#endif
 
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>
@@ -36,6 +40,7 @@ namespace UniT {
 	template <typename Rep> using Femtometer       = Distance<Rep, std::femto>;
 
 
+#ifndef UNIT_TYPE_ONLY
 	template <typename Rep>
 	struct unit_symbol<Parsec<Rep>> {static constexpr auto value() noexcept -> std::string {return "pc";}};
 	template <typename Rep>
@@ -44,6 +49,7 @@ namespace UniT {
 	struct unit_symbol<AstronomicalUnit<Rep>> {static constexpr auto value() noexcept -> std::string {return "au";}};
 	template <typename Rep>
 	struct unit_symbol<Angström<Rep>> {static constexpr auto value() noexcept -> std::string {return "Å";}};
+#endif
 
 
 	namespace freedom {
@@ -62,6 +68,7 @@ namespace UniT {
 		template <typename Rep> using Mile = Distance<Rep, std::ratio<1'609'344, 1000>>;
 	}
 
+#ifndef UNIT_TYPE_ONLY
 	template <typename Rep>
 	struct unit_symbol<freedom::AverageMcdonaldDistance<Rep>> {static constexpr auto value() noexcept -> std::string {return "mcdonald-trip";}};
 	template <typename Rep>
@@ -83,4 +90,5 @@ namespace UniT {
 	struct unit_symbol<forbidden::Yard<Rep>> {static constexpr auto value() noexcept -> std::string {return "yd";}};
 	template <typename Rep>
 	struct unit_symbol<forbidden::Mile<Rep>> {static constexpr auto value() noexcept -> std::string {return "mi";}};
+#endif
 }

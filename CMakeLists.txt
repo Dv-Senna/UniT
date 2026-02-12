@@ -12,6 +12,11 @@ set_property(TARGET UniT_UniT PROPERTY CXX_STANDARD 26)
 target_include_directories(UniT_UniT INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_library(UniT::UniT ALIAS UniT_UniT)
 
+add_library(UniT_type_only INTERFACE)
+target_compile_definitions(UniT_type_only INTERFACE UNIT_TYPE_ONLY)
+target_link_libraries(UniT_type_only INTERFACE UniT::UniT)
+add_library(UniT::type-only ALIAS UniT_type_only)
+
 
 if (PROJECT_IS_TOP_LEVEL)
 	add_executable(UniT_examples examples/main.cpp)

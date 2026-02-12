@@ -1,6 +1,8 @@
 #pragma once
 
-#include "UniT/formatting.hpp"
+#ifndef UNIT_TYPE_ONLY
+	#include "UniT/formatting.hpp"
+#endif
 #include "UniT/single.hpp"
 
 
@@ -9,10 +11,12 @@ namespace UniT {
 		struct Mass {};
 	}
 
+#ifndef UNIT_TYPE_ONLY
 	template <>
 	struct quantity_symbol<quantities::Mass> {
 		static constexpr std::string_view value {"kg"};
 	};
+#endif
 
 
 	template <typename Rep, typename Prefix = std::ratio<1, 1>>
@@ -31,6 +35,7 @@ namespace UniT {
 	template <typename Rep> using Picogram  = Mass<Rep, std::femto>;
 
 
+#ifndef UNIT_TYPE_ONLY
 	template <typename Rep>
 	struct unit_symbol<Gigatonne<Rep>> {static constexpr auto value() noexcept -> std::string {return "Gt";}};
 	template <typename Rep>
@@ -49,4 +54,5 @@ namespace UniT {
 	struct unit_symbol<Nanogram<Rep>> {static constexpr auto value() noexcept -> std::string {return "ng";}};
 	template <typename Rep>
 	struct unit_symbol<Picogram<Rep>> {static constexpr auto value() noexcept -> std::string {return "pg";}};
+#endif
 }
