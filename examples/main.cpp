@@ -55,5 +55,9 @@ int main(int, char**) {
 	std::println("p3 : {}", p3);
 	std::println("m2 : {}", m2);
 
+	UniT::Second t {12.f};
+	t += duration;
+	std::println("t : {}", t);
+
 	return 0;
 }

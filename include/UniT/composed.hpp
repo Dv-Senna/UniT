@@ -123,7 +123,7 @@ namespace UniT {
 	template <composed Lhs, composed Rhs>
 	requires same_composed<Lhs, Rhs>
 	[[gnu::always_inline]]
-	constexpr auto operator<=>(const Lhs &lhs, const Rhs &rhs) noexcept -> bool {return lhs.get() <=> rhs.get();}
+	constexpr auto operator<=>(const Lhs &lhs, const Rhs &rhs) noexcept -> auto {return lhs.get() <=> rhs.get();}
 
 
 

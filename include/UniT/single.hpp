@@ -34,9 +34,9 @@ namespace UniT {
 			constexpr auto operator<=>(const This&) const noexcept = default;
 
 			[[gnu::always_inline]]
-			constexpr auto operator+=(const This &other) noexcept -> This& {m_data += other; return *this;}
+			constexpr auto operator+=(const This &other) noexcept -> This& {m_data += other.m_data; return *this;}
 			[[gnu::always_inline]]
-			constexpr auto operator-=(const This &other) noexcept -> This& {m_data += other; return *this;}
+			constexpr auto operator-=(const This &other) noexcept -> This& {m_data -= other.m_data; return *this;}
 			[[gnu::always_inline]]
 			constexpr auto operator+(const This &other) const noexcept -> This {auto tmp {*this}; return tmp += other;}
 			[[gnu::always_inline]]
